@@ -2,6 +2,22 @@
 
 A Python library for building serverless [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) HTTP servers on AWS Lambda. Register tools and resources using decorators, plug in session storage, and drop the handler into any Lambda function.
 
+## Why this project?
+
+Running an MCP server typically means managing a long-lived process — a container, an EC2 instance, or a persistent service that stays up waiting for connections. That works, but it comes with real operational overhead: you need to provision infrastructure, handle scaling, pay for idle time, and manage availability.
+
+AWS Lambda flips that model. A Lambda function spins up on demand, handles a request, and disappears. You pay only for what you use, AWS handles scaling automatically, and there is no infrastructure to maintain.
+
+The problem is that MCP speaks JSON-RPC over HTTP with session state, and Lambda speaks API Gateway proxy events. Bridging the two correctly — parsing the protocol, routing methods, managing sessions, serialising responses — is tedious boilerplate that every project would otherwise have to write from scratch.
+
+This library does that work for you. You write plain Python functions, decorate them with `@mcp.tool()`, and point your Lambda handler at `mcp.handle_request`. The result is a fully compliant MCP HTTP server that:
+
+- **Costs nothing at rest** — Lambda charges only per invocation, so an MCP server with light traffic costs fractions of a cent per month
+- **Scales to zero and back instantly** — no always-on process, no warm-up configuration needed for most workloads
+- **Deploys in minutes** — zip your code, set the handler, done; no Docker, no ECS, no load balancer to configure
+- **Integrates with the AWS ecosystem naturally** — your tool functions run inside Lambda, so they have IAM roles, VPC access, environment variables, and direct access to every AWS service
+- **Handles sessions without extra infrastructure** — pass a DynamoDB table name and per-client session state is managed for you with a 24-hour TTL
+
 ## Installation
 
 ```bash
