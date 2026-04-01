@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "awslabs.mcp-lambda-handler"
+name = "aws-lambda-mcp-server"
 version = "0.1.14"
 description = "AWS Lambda MCP Server: A serverless HTTP handler for the Model Context Protocol (MCP) using AWS Lambda."
 readme = "README.md"
