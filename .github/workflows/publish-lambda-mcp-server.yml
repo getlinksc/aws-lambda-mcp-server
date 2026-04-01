@@ -1,0 +1,60 @@
+name: Publish lambda-mcp-server to PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  actions: none
+  attestations: none
+  checks: none
+  contents: none
+  deployments: none
+  discussions: none
+  id-token: none
+  issues: none
+  models: none
+  packages: none
+  pages: none
+  pull-requests: none
+  repository-projects: none
+  security-events: none
+  statuses: none
+
+jobs:
+  deploy:
+    name: Build and Publish to PyPI
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: release
+      url: https://pypi.org/project/lambda-mcp-server/
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
+
+      - name: Set up Python
+        working-directory: src/mcp-lambda-handler
+        run: uv python install
+
+      - name: Override package name
+        working-directory: src/mcp-lambda-handler
+        run: sed -i 's/^name = .*/name = "lambda-mcp-server"/' pyproject.toml
+
+      - name: Build package
+        working-directory: src/mcp-lambda-handler
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+        with:
+          packages-dir: src/mcp-lambda-handler/dist
+          print-hash: true
